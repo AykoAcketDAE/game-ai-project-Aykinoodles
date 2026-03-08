@@ -22,11 +22,23 @@ public:
 	template<class T, std::enable_if_t<std::is_base_of_v<ISteeringBehavior, T>>* = nullptr>
 	T* As()
 	{ return static_cast<T*>(this); }
-
-protected:
-	FTargetData Target;
+	
 	void DrawDebugLines(ASteeringAgent & Agent, const SteeringOutput& steering)const;
 	
+protected:
+	FTargetData Target;
+	
+	enum class BehaviorType
+	{
+		Seek,
+		Wander,
+		Flee,
+		Arrive,
+		Evade,
+		Pursuit,
+		Face
+	};
+	BehaviorType Type{};
 };
 
 // Your own SteeringBehaviors should follow here...
@@ -48,3 +60,59 @@ public:
 //steering
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 };
+
+class Arrive: public ISteeringBehavior
+{
+public:
+	Arrive() = default;
+	virtual ~Arrive() override = default;
+	//steering
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+
+private:
+	float OutsideDistance{500};
+	float InsideDistance{75};
+	float MaxSpeed{};
+	bool FirstFrame{false};
+};
+
+class Face: public ISteeringBehavior
+{
+public:
+	Face() = default;
+	virtual ~Face() override = default;
+	//steering
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+};
+
+class Wander: public ISteeringBehavior
+{
+public:
+	Wander() = default;
+	virtual ~Wander() override = default;
+	//steering
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+private:
+	float WanderAngle{};
+};
+class Pursuit: public ISteeringBehavior
+{
+public:
+	Pursuit() = default;
+	virtual ~Pursuit() override = default;
+	//steering
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+private:
+	
+};
+class Evade: public ISteeringBehavior
+{
+public:
+	Evade() = default;
+	virtual ~Evade() override = default;
+	//steering
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+private:
+	float m_EvadeRadius{200};
+};
+

@@ -8,6 +8,11 @@ ASteeringAgent::ASteeringAgent()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
 // Called when the game starts or when spawned
@@ -29,8 +34,12 @@ void ASteeringAgent::Tick(float DeltaTime)
 	if (SteeringBehavior)
 	{
 		SteeringOutput output = SteeringBehavior->CalculateSteering(DeltaTime, *this);
-		AddMovementInput(FVector{output.LinearVelocity, 0.f});
+
+		FVector SteeringDir(output.LinearVelocity.X, output.LinearVelocity.Y, 0.f);
+		AddActorLocalRotation(FRotator(0.f, output.AngularVelocity * DeltaTime, 0.f));
+		AddMovementInput(GetActorForwardVector(), output.LinearVelocity.Length()/GetMaxLinearSpeed());
 	}
+	
 }
 
 // Called to bind functionality to input

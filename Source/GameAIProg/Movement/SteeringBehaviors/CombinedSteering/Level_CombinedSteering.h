@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include <memory>
+#include <string>
+
 #include "CoreMinimal.h"
 #include "CombinedSteeringBehaviors.h"
 #include "GameAIProg/Shared/Level_Base.h"
@@ -31,6 +34,17 @@ private:
 	//Datamembers
 	bool UseMouseTarget = false;
 	bool CanDebugRender = false;
+	
+	
+	std::unique_ptr<BlendedSteering> m_BlendedSteeringUPtr{}; 
+	std::unique_ptr<Seek> m_SeekUPtr{}; 
+	std::unique_ptr<Wander> m_WanderBlendUPtr{};
+	ASteeringAgent* m_WanderAgentPtr{nullptr};
 
+	std::unique_ptr<PrioritySteering> m_PrioritySteeringUPtr{}; 
+	std::unique_ptr<Evade> m_EvadeUPtr{}; 
+	std::unique_ptr<Wander> m_WanderPriorityUPtr{};
+	ASteeringAgent* m_EvadingAgentPtr{nullptr};
+	
 	
 };

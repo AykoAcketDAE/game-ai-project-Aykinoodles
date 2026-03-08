@@ -38,6 +38,7 @@ private:
 		Arrive,
 		Evade,
 		Pursuit,
+		Face,
 
 		// @ End
 		Count
@@ -47,7 +48,7 @@ private:
 	{
 		ASteeringAgent* Agent{nullptr};
 		std::unique_ptr<ISteeringBehavior> Behavior{nullptr};
-		int SelectedBehavior{static_cast<int>(BehaviorTypes::Flee)};
+		int SelectedBehavior{static_cast<int>(BehaviorTypes::Arrive)};
 		int SelectedTarget = -1;
 	};
 	
