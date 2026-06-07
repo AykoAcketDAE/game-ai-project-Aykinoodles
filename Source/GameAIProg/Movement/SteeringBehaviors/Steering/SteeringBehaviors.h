@@ -73,7 +73,7 @@ private:
 	float OutsideDistance{500};
 	float InsideDistance{75};
 	float MaxSpeed{};
-	bool FirstFrame{false};
+	bool bCachedMaxSpeed{false};
 };
 
 class Face: public ISteeringBehavior

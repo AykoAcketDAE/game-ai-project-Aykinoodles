@@ -61,7 +61,7 @@ private:
 	float NeighborhoodRadius{200.f};
 	int NrOfNeighbors{0};
 
-	ASteeringAgent* pAgentToEvade{nullptr};
+	ASteeringAgent* pAgentToEvading{nullptr};
 	
 	//Steering Behaviors
 	std::unique_ptr<Separation> pSeparationBehavior{};

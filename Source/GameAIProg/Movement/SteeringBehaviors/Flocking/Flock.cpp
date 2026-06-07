@@ -12,7 +12,7 @@ Flock::Flock(
 	bool bTrimWorld)
 	: pWorld{pWorld}
 	, FlockSize{ FlockSize }
-	, pAgentToEvade{pAgentToEvade}
+	, pAgentToEvading{pAgentToEvade}
 {
 	Agents.Reserve(FlockSize);
 	Neighbors.Reserve(FlockSize);
@@ -52,10 +52,21 @@ Flock::Flock(
 
 		if (Agent)
 		{
-			Agent->SetSteeringBehavior(pBlendedSteering.get());
+			Agent->SetSteeringBehavior(pPrioritySteering.get());
 			Agents.Add(Agent);
 		}
 	}
+	FActorSpawnParameters Params;
+
+	pAgentToEvading = pWorld->SpawnActor<ASteeringAgent>(
+			AgentClass,
+				FVector (0,0,0.f),
+			FRotator::ZeroRotator,
+			Params);
+	
+	
+	pAgentToEvading->SetSteeringBehavior(pWanderBehavior.get());
+	
 	
 	
 }
@@ -68,7 +79,7 @@ Flock::~Flock()
 		if (Agent)
 			Agent->Destroy();
 	}
-
+	pAgentToEvading->Destroy();
 	Agents.Empty();
 }
 
@@ -79,7 +90,9 @@ void Flock::Tick(float DeltaTime)
   // TODO: register the neighbors for this agent (-> fill the memory pool with the neighbors for the currently evaluated agent)
   // TODO: update the agent (-> the steeringbehaviors use the neighbors in the memory pool)
   // TODO: trim the agent to the world
-	//pEvadeBehavior->SetTarget(pAgentToEvade.GetPosition());
+	FTargetData data {pAgentToEvading->GetPosition()};
+	pEvadeBehavior->SetTarget(data);
+	
 	for (ASteeringAgent* Agent : Agents)
 	{
 		RegisterNeighbors(Agent);

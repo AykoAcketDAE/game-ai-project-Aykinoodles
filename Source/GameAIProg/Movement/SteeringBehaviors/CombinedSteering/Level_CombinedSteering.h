@@ -45,6 +45,36 @@ private:
 	std::unique_ptr<Evade> m_EvadeUPtr{}; 
 	std::unique_ptr<Wander> m_WanderPriorityUPtr{};
 	ASteeringAgent* m_EvadingAgentPtr{nullptr};
+
+	static constexpr int32 WolfCount = 5;
+ 
+	std::unique_ptr<WolfpackSteering>    m_WolfpackUPtr{};
+	TArray<ASteeringAgent*>              m_WolfAgents{};
+
+	static constexpr int32 PassengerCount = 8;
 	
+	enum class EDoorState : uint8
+	{
+		Closed,  
+		ExitFlow,
+		Boarding,
+		Departed,
+	};
+ 
+	std::unique_ptr<MetroBoardingSteering>       m_BoardingUPtr{};
+	TArray<ASteeringAgent*>                      m_PassengerAgents{};
+	TArray<MetroBoardingSteering::Ticket>        m_PassengerTickets{};
+ 
+	EDoorState m_DoorState        = EDoorState::Closed;
+	float      m_DoorTimer        = 0.f;  
 	
+	float      m_ClosedDuration   = 4.f;   
+	float      m_ExitFlowDuration = 3.f;   
+	float      m_BoardingDuration = 10.f;  
+
+	int32      m_PendingDoorState = -1;
+	
+	void       TickDoorStateMachine(float DeltaTime);
+	int32      CountPassengersInPhase(MetroBoardingSteering::EBoardingPhase Phase) const;
+
 };

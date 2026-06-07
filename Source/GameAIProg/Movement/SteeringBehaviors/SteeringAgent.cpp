@@ -42,7 +42,6 @@ void ASteeringAgent::Tick(float DeltaTime)
 	
 }
 
-// Called to bind functionality to input
 void ASteeringAgent::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
