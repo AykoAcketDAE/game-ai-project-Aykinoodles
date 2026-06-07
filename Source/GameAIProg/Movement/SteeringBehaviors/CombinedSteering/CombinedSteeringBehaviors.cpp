@@ -235,45 +235,40 @@ MetroBoardingSteering::Ticket MetroBoardingSteering::RegisterPassenger(
     const FVector2D& SeatPosition)
 {
     Ticket T;
-    T.QueueSlot = Passengers.Num();   // first-come, first-served slot order
+    T.QueueSlot = Passengers.Num();   
     T.SeatPos   = SeatPosition;
     T.Phase     = EBoardingPhase::Queueing;
  
     Passengers.Add(Agent);
     return T;
-    // Caller owns the Ticket and passes it back by reference every tick.
-    // The level drives passengers directly via CalculateSteering(DeltaT, Agent, Ticket&)
-    // so no TicketMap pointer wiring is needed.
+    
 }
  
 void MetroBoardingSteering::UnregisterPassenger(ASteeringAgent* Agent)
 {
     Passengers.Remove(Agent);
 }
- 
-// ─── Per-frame state ──────────────────────────────────────────────────────────
+
  
 void MetroBoardingSteering::SetExitFlow(const FVector2D& FlowDir, bool bActive)
 {
     ExitFlowDir     = FlowDir.IsNearlyZero() ? FlowDir : FlowDir.GetSafeNormal();
     bExitFlowActive = bActive;
 }
- 
-// ─── Geometry helpers ─────────────────────────────────────────────────────────
+
  
 FVector2D MetroBoardingSteering::CalcQueueSlotPos(int32 SlotIndex) const
 {
-    // Perpendicular to DoorDirection — the "across-the-platform" axis
+   
     FVector2D Perp(-DoorDirection.Y, DoorDirection.X);
  
-    // Spread slots in a zigzag fan: slot 0 directly in front of the door,
-    // odd/even slots fan left and right so passengers don't stack into a column.
+   
     int32 Side          = (SlotIndex % 2 == 0) ? 1 : -1;
     int32 Row           = SlotIndex / 2;
     float LateralOffset = Side * Row * (DoorWidth * 0.5f + 10.f);
     float DepthOffset   = QueueOffset + Row * QueueSpacing * 0.5f;
  
-    // Queue forms on the platform side — opposite to DoorDirection
+    
     return DoorPosition
          - DoorDirection * DepthOffset
          + Perp          * LateralOffset;
@@ -286,13 +281,12 @@ FVector2D MetroBoardingSteering::CalcFunnelEntryPos() const
  
 bool MetroBoardingSteering::IsInsideTrain(const FVector2D& AgentPos) const
 {
-    // Positive dot product → agent is on the train side of the door plane
+ 
     FVector2D ToAgent = AgentPos - DoorPosition;
     return FVector2D::DotProduct(ToAgent, DoorDirection) > 0.f;
 }
  
-// ─── Steering helpers ─────────────────────────────────────────────────────────
- 
+
 float MetroBoardingSteering::ArriveSpeed(float Distance, float MaxSpeed) const
 {
     if (Distance > ArriveFullSpeed) return MaxSpeed;
@@ -335,22 +329,15 @@ float MetroBoardingSteering::TurnToward(const FVector2D& DesiredDir,
     float CurrentAngle = Agent.GetActorRotation().Yaw;
     float AngleDiff    = FMath::FindDeltaAngleDegrees(CurrentAngle, DesiredAngle);
  
-    return FMath::Clamp(AngleDiff / DeltaT,
-                        -Agent.GetMaxAngularSpeed(),
-                         Agent.GetMaxAngularSpeed());
+    return FMath::Clamp(AngleDiff / DeltaT,-Agent.GetMaxAngularSpeed(),Agent.GetMaxAngularSpeed());
 }
  
-// ─── Base overload ────────────────────────────────────────────────────────────
-// Not used — passengers are driven directly from the level via the Ticket overload.
-// Implemented as a no-op so the vtable slot is satisfied.
- 
+
 SteeringOutput MetroBoardingSteering::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
     return SteeringOutput{};
 }
- 
-// ─── Main implementation ──────────────────────────────────────────────────────
- 
+
 SteeringOutput MetroBoardingSteering::CalculateSteering(float           DeltaT,
                                                          ASteeringAgent& Agent,
                                                          Ticket&         T)
@@ -361,15 +348,13 @@ SteeringOutput MetroBoardingSteering::CalculateSteering(float           DeltaT,
     const FVector2D AgentPos = Agent.GetPosition();
     const float     MaxSpeed = Agent.GetMaxLinearSpeed();
  
-    // Separation is blended into every phase as a gentle nudge
+  
     FVector2D SepDir    = CalcSeparationDir(Agent);
     float     SepWeight = 0.35f;
  
     switch (T.Phase)
     {
  
-    // ── QUEUEING ──────────────────────────────────────────────────────────────
-    // Walk toward the assigned queue slot in front of the door.
     case EBoardingPhase::Queueing:
     {
         FVector2D SlotPos  = CalcQueueSlotPos(T.QueueSlot);
@@ -383,12 +368,11 @@ SteeringOutput MetroBoardingSteering::CalculateSteering(float           DeltaT,
         float Speed = ArriveSpeed(Distance, MaxSpeed);
         Output.LinearVelocity  = FVector2D(Speed, 0.f);
         Output.AngularVelocity = TurnToward(DesiredDir, Agent, DeltaT);
- 
-        // In slot and exit flow is active → yield for disembarking passengers
+            
         if (Distance < ArriveTolerance && bExitFlowActive)
             T.Phase = EBoardingPhase::Yielding;
  
-        // In slot and no exit flow → proceed straight to funneling
+        
         if (Distance < ArriveTolerance && !bExitFlowActive)
             T.Phase = EBoardingPhase::Funneling;
  

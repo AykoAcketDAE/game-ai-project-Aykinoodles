@@ -142,7 +142,6 @@ void ALevel_CombinedSteering::TickDoorStateMachine(float DeltaTime)
     switch (m_DoorState)
     {
     case EDoorState::Closed:
-        // Doors shut — no exit flow, passengers are queueing
         m_BoardingUPtr->SetExitFlow(FVector2D::ZeroVector, false);
  
         if (m_DoorTimer >= m_ClosedDuration)
@@ -153,7 +152,6 @@ void ALevel_CombinedSteering::TickDoorStateMachine(float DeltaTime)
         break;
  
     case EDoorState::ExitFlow:
-        // Exiting passengers stream out in –Y (away from the train)
         m_BoardingUPtr->SetExitFlow(FVector2D(0.f, -1.f), true);
  
         if (m_DoorTimer >= m_ExitFlowDuration)
@@ -164,7 +162,6 @@ void ALevel_CombinedSteering::TickDoorStateMachine(float DeltaTime)
         break;
  
     case EDoorState::Boarding:
-        // Exit flow is done — boarders can now funnel through
         m_BoardingUPtr->SetExitFlow(FVector2D::ZeroVector, false);
  
         if (m_DoorTimer >= m_BoardingDuration)
@@ -175,7 +172,6 @@ void ALevel_CombinedSteering::TickDoorStateMachine(float DeltaTime)
         break;
  
     case EDoorState::Departed:
-        // All done — nothing to update until the level resets
         m_BoardingUPtr->SetExitFlow(FVector2D::ZeroVector, false);
         break;
     }
