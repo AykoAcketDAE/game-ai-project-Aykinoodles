@@ -1,3 +1,4 @@
-# Game AI Project
+# Extra Assignment
+The extra assignment is from week 2.
+The topics I have are WolfPack steering behavior and a borked version of a metro boarding
 
-Feel free to edit the readme to your liking
